@@ -2,6 +2,7 @@ package com.example.movieservice.service;
 
 import com.example.movieservice.model.Movie;
 import com.example.movieservice.model.MovieCategory;
+import com.example.movieservice.repository.MovieRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,49 +11,37 @@ import java.util.List;
 @Service
 public class MovieService {
 
-    List<Movie> movies = new ArrayList<>();
+    private final MovieRepository movieRepository;
 
-    public MovieService() {
-        movies.add(new Movie(1, "Kapitan Bomba", MovieCategory.HORROR, "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."));
-        movies.add(new Movie(2, "Blok ekipa", MovieCategory.ACTION, "Freedom fighters use extraordinary skills and weaponry to revolt against machines."));
-        movies.add(new Movie(3, "Please send help", MovieCategory.COMEDY, "The human city of Zion defends itself against the massive invasion of the machines as Neo fights to end the war at another front while also opposing the rogue Agent Smith."));
-        movies.add(new Movie(4, "GTA 6", MovieCategory.HORROR, "The human city of Zion defends itself against the massive invasion of the machines as Neo fights to end the war at another front while also opposing the rogue Agent Smith."));
+    public MovieService(MovieRepository movieRepository) {
+        this.movieRepository = movieRepository;
     }
 
-    public List<Movie> getAllMovies() {
-        return movies;
+
+    public List<Movie> getAllMovies(){
+        return movieRepository.findAll();
     }
 
-    public Movie getMovieById(int id) {
-        for (Movie movie : movies) {
-            if (movie.getId() == id) {
-                return movie;
-            }
-        }
-        return null;
+    public Movie saveMovie(Movie movie){
+        return movieRepository.save(movie);
     }
-
-    public Movie addMovie(Movie movie) {
-        movies.add(movie);
-        return movie;
+    public Movie deleteMovieById(int id){
+        return movieRepository.deleteById(id);
     }
-
-    public void updateMovie(int id, Movie movie) {
-        for(Movie singleMovie : movies){
-            if(singleMovie.getId() == id){
-                singleMovie.setName(movie.getName());
-                singleMovie.setMovieCategory(movie.getMovieCategory());
-                singleMovie.setDescription(movie.getDescription());
-            }
-        }
+    public Movie findMovieById(int id){
+        return movieRepository.findMovieById(id);
     }
-
-    public void deleteMovie(int id){
-        for(Movie singleMovie : movies){
-            if(singleMovie.getId() == id){
-                movies.remove(singleMovie);
-            }
-        }
+    public Movie updateMovie(int id, Movie movie){
+        Movie movieToUpdate = movieRepository.findMovieById(id);
+        movieToUpdate.setName(movie.getName());
+        movieToUpdate.setMovieCategory(movie.getMovieCategory());
+        movieToUpdate.setDescription(movie.getDescription());
+        movieToUpdate.setIsAvailable(movie.getIsAvailable());
+        return movieRepository.save(movieToUpdate);
     }
-
+    public Movie updateMovieAvailability(int id){
+        Movie movieToUpdate = movieRepository.findMovieById(id);
+        movieToUpdate.setIsAvailable(1);
+        return movieRepository.save(movieToUpdate);
+    }
 }

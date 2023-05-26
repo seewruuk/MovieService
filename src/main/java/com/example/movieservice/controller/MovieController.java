@@ -4,11 +4,13 @@ package com.example.movieservice.controller;
 import com.example.movieservice.MovieServiceApplication;
 import com.example.movieservice.model.Movie;
 import com.example.movieservice.service.MovieService;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,58 +23,46 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRunTimeException(RuntimeException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("error: " + e.getLocalizedMessage());
+
+    @GetMapping("/movies/{id}")
+    public ResponseEntity<Movie> getMovieWithId(@PathVariable int id){
+        Movie movie = movieService.findMovieById(id);
+        return ResponseEntity.ok(movie);
     }
 
     @GetMapping("/movies")
     public ResponseEntity<List<Movie>> getAllMovies(){
-        return ResponseEntity.ok(movieService.getAllMovies());
-    }
-
-    @GetMapping("/exception")
-    public ResponseEntity<String> throwException(){
-        throw new RuntimeException("test exception");
-    }
-
-    @GetMapping("/movies/{id}")
-    public ResponseEntity<Movie> getMovieById(@PathVariable int id){
-            if(movieService.getMovieById(id) == null){
-              throw new RuntimeException("Movie with id: " + id + " not found " + ResponseEntity.notFound().build());
-            }else{
-                return ResponseEntity.ok(movieService.getMovieById(id));
-            }
+        List<Movie> movies = movieService.getAllMovies();
+        return ResponseEntity.ok(movies);
     }
 
     @PostMapping("/movies")
-    public ResponseEntity<Movie> addMovie(@RequestBody Movie movie){
-        if(movieService.getMovieById(movie.getId()) != null) {
-            throw new RuntimeException("Movie with id (" + movie.getId() + ") already exists " + ResponseEntity.badRequest().build());
-        }else{
-            return ResponseEntity.ok(movieService.addMovie(movie));
-        }
-    }
-    @PutMapping("/movies/{id}")
-    public ResponseEntity<Movie> updateMovie(@PathVariable int id, @RequestBody Movie movie){
-        if(movieService.getMovieById(id) == null) {
-            throw new RuntimeException("Movie with id (" + id + ") not found, " + ResponseEntity.badRequest().build());
-    }else{
-            movieService.updateMovie(id, movie);
-            return ResponseEntity.ok(movieService.getMovieById(id));
-        }
+    public ResponseEntity<Movie> saveMovie(@RequestBody Movie movie){
+        Movie savedMovie = movieService.saveMovie(movie);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedMovie);
     }
 
     @DeleteMapping("/movies/{id}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable int id) {
-        if(movieService.getMovieById(id) == null){
-            throw new RuntimeException("Movie with id: " + id + " not found " + ResponseEntity.badRequest().build());
-        }else{
-            movieService.deleteMovie(id);
-            return ResponseEntity.noContent().build();
-        }
+    public ResponseEntity<Movie> deleteMovie(@PathVariable int id){
+        Movie movie = movieService.deleteMovieById(id);
+        return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/movies/{id}")
+    public ResponseEntity<Movie> updateMovie(@PathVariable int id, @RequestBody Movie movie){
+        Movie updatedMovie = movieService.updateMovie(id, movie);
+        return ResponseEntity.ok(updatedMovie);
+    }
+
+    @PutMapping("/movies/{id}/available")
+    public ResponseEntity<Movie> updateMovieAvailability(@PathVariable int id){
+        Movie updatedMovie = movieService.updateMovieAvailability(id);
+        return ResponseEntity.ok(updatedMovie);
+    }
+
+
+
+
 
 
 
