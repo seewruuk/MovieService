@@ -25,7 +25,6 @@ public class Movie {
     @Column(name = "category")
     @Enumerated(EnumType.STRING)
     private MovieCategory movieCategory;
-//test
     @Column(name = "isavailable", columnDefinition = "BIT")
     private int isAvailable;
 
